@@ -384,9 +384,13 @@ _TOOL_RESULT = {"role": "tool", "tool_call_id": "c1", "content": "result"}
 
 @pytest.mark.parametrize(("between", "splices"), [
     ([_TOOL_CALL, _TOOL_RESULT], True),
+    ([{**_TOOL_CALL, "content": [{"type": "text", "text": None}]}, _TOOL_RESULT], True),
+    ([{**_TOOL_CALL, "content": "visible preamble"}, _TOOL_RESULT], False),
+    ([{**_TOOL_CALL, "content": [{"type": "text", "content": "visible preamble"}]}, _TOOL_RESULT], False),
     ([{"role": "assistant", "content": "visible reply"}], False),
     ([{"role": "user", "content": "new request"}], False),
-], ids=["tool-traffic", "assistant-reply", "user-turn"])
+], ids=["tool-traffic", "empty-text-part", "call-with-text", "call-with-structured-text", "assistant-reply",
+        "user-turn"])
 def test_boundary_past_the_cut_splices_only_over_tool_traffic(between, splices):
     """The cut can move back past the summary's boundary; splicing then summarises those rows, which is
     only allowed for tool calls and results, never a user turn or a reply the fresh plan keeps verbatim."""
